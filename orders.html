@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orders - Rajesh Sweet Stall</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo">
+        <h1>🍬 Rajesh Sweet Stall</h1>
+      </div>
+      <ul class="nav-menu">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="sweets.html">Sweets</a></li>
+        <li><a href="cart.html">Cart</a></li>
+        <li><a href="orders.html" class="active">Orders</a></li>
+        <li id="admin-link" style="display: none;"><a href="admin.html">Admin</a></li>
+        <li id="auth-link"><a href="auth.html">Login</a></li>
+        <li id="logout-link" style="display: none;"><a href="#" id="logout-btn">Logout</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="orders-container">
+    <h2 class="page-title">Your Orders</h2>
+
+    <div id="orders-content">
+      <div class="loading">Loading your orders...</div>
+    </div>
+  </div>
+
+  <script type="module" src="orders.js"></script>
+</body>
+</html>

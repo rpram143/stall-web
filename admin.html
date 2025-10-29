@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - Rajesh Sweet Stall</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">  
+      <div class="logo">
+        <h1> Rajesh Sweet Stall</h1>
+      </div>
+      <ul class="nav-menu">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="sweets.html">Sweets</a></li>
+        <li><a href="admin.html" class="active">Products</a></li>
+        <li><a href="admin-orders.html">Orders</a></li>
+        <li><a href="admin-users.html">Users</a></li>
+        <li><a href="#" id="admin-logout-btn">Logout</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="admin-container">
+    <div class="admin-header">
+      <h2>Product Management</h2>
+      <button id="add-product-btn" class="cta-button">Add New Sweet</button>
+    </div>
+
+    <div id="product-form-modal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3 id="form-title">Add New Sweet</h3>
+        <form id="product-form">
+          <input type="hidden" id="product-id">
+          <div class="form-group">
+            <label for="product-name">Sweet Name</label>
+            <input type="text" id="product-name" required placeholder="e.g., Mysore Pak">
+          </div>
+          <div class="form-group">
+            <label for="product-description">Description</label>
+            <textarea id="product-description" required placeholder="Describe the sweet"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="product-price">Price (₹ per kg)</label>
+            <input type="number" id="product-price" required min="0" step="10" placeholder="250">
+          </div>
+          <div class="form-group">
+            <label for="product-image">Image URL</label>
+            <input type="url" id="product-image" required placeholder="https://images.pexels.com/...">
+          </div>
+          <button type="submit" class="auth-button">Save Product</button>
+          <div id="form-message" class="message"></div>
+        </form>
+      </div>
+    </div>
+
+    <div class="admin-products">
+      <table class="products-table">
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Price (₹/kg)</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="admin-products-list">
+          <tr>
+            <td colspan="5" class="loading">Loading products...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script type="module" src="admin.js"></script>
+</body>
+</html>

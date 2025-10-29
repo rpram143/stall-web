@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sweets - Rajesh Sweet Stall</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="sweets-page">
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo">
+        <h1>🍬 Rajesh Sweet Stall</h1>
+      </div>
+      <ul class="nav-menu">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="sweets.html" class="active">Sweets</a></li>
+        <li id="cart-link" style="display: none;"><a href="cart.html">Cart <span id="cart-count" class="badge"></span></a></li>
+        <li id="orders-link" style="display: none;"><a href="orders.html">Orders</a></li>
+        <li id="admin-link" style="display: none;"><a href="admin.html">Admin</a></li>
+        <li id="auth-link"><a href="auth.html">Login</a></li>
+        <li id="logout-link" style="display: none;"><a href="#" id="logout-btn">Logout</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section class="products-section">
+    <div class="section-header">
+      <h2>Our Traditional Sweets</h2>
+      <p>Handcrafted with authentic recipes passed through generations</p>
+    </div>
+    <div id="products-grid" class="products-grid">
+      <div class="loading">Loading delicious sweets...</div>
+    </div>
+  </section>
+
+  <script type="module" src="sweets.js"></script>
+</body>
+</html>
+

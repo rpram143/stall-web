@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rajesh Sweet Stall - Traditional Tamil Nadu Sweets</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo">
+        <h1> Rajesh Sweet Stall</h1>
+      </div>
+      <ul class="nav-menu">
+        <li><a href="index.html" class="active">Home</a></li>
+        <li><a href="sweets.html">Sweets</a></li>
+        <li><a href="#about">About</a></li>
+        <li id="cart-link" style="display: none;"><a href="cart.html">Cart <span id="cart-count" class="badge"></span></a></li>
+        <li id="orders-link" style="display: none;"><a href="orders.html">Orders</a></li>
+        <li id="admin-link" style="display: none;"><a href="admin.html">Admin</a></li>
+        <li id="auth-link"><a href="auth.html">Login</a></li>
+        <li id="logout-link" style="display: none;"><a href="#" id="logout-btn">Logout</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-content">
+      <h2 class="hero-title">Welcome to Rajesh Sweet Stall</h2>
+      <p class="hero-subtitle">Authentic Tamil Nadu Sweets Since 1985</p>
+      <p class="hero-description">Experience the traditional taste of South India's finest sweets, made with pure ghee and love</p>
+      <a href="#about" class="cta-button">Learn More</a>
+    </div>
+  </section>
+
+  <section id="products" class="products-section" style="display: none;">
+    <div class="section-header">
+      <h2>Our Traditional Sweets</h2>
+      <p>Handcrafted with authentic recipes passed through generations</p>
+    </div>
+    <div id="products-grid" class="products-grid">
+      <div class="loading">Loading delicious sweets...</div>
+    </div>
+  </section>
+
+  <section id="about" class="about-section">
+    <div class="about-container">
+      <h2>About Rajesh Sweet Stall</h2>
+      <p>For over three decades, Rajesh Sweet Stall has been serving the finest traditional Tamil Nadu sweets. Our recipes have been carefully preserved and perfected over generations, ensuring every bite takes you back to the authentic flavors of South India.</p>
+      <p>We use only the finest ingredients - pure ghee, premium cashews, and traditional methods to create sweets that are not just delicious, but also made with love and care.</p>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>&copy; 2025 Rajesh Sweet Stall. All rights reserved.</p>
+    <p>Traditional Tamil Nadu Sweets | Made with Pure Ghee</p>
+  </footer>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>
