@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cart - Rajesh Sweet Stall</title>
+  <script type="module" crossorigin src="/stall-web/assets/cart-DSt07r2y.js"></script>
+  <link rel="modulepreload" crossorigin href="/stall-web/assets/db-Ddrb56FG.js">
+  <link rel="stylesheet" crossorigin href="/stall-web/assets/db-Cban_8o7.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo">
+        <h1>🍬 Rajesh Sweet Stall</h1>
+      </div>
+      <ul class="nav-menu">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="sweets.html">Sweets</a></li>
+        <li><a href="cart.html" class="active">Cart <span id="cart-count" class="badge"></span></a></li>
+        <li><a href="orders.html">Orders</a></li>
+        <li id="admin-link" style="display: none;"><a href="admin.html">Admin</a></li>
+        <li id="auth-link"><a href="auth.html">Login</a></li>
+        <li id="logout-link" style="display: none;"><a href="#" id="logout-btn">Logout</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="cart-container">
+    <h2 class="page-title">Your Shopping Cart</h2>
+
+    <div id="cart-content">
+      <div class="loading">Loading your cart...</div>
+    </div>
+
+    <div id="cart-summary" class="cart-summary" style="display: none;">
+      <h3>Order Summary</h3>
+      <div class="summary-row">
+        <span>Subtotal:</span>
+        <span id="subtotal">₹0</span>
+      </div>
+      <div class="summary-row">
+        <span>Delivery:</span>
+        <span>₹50</span>
+      </div>
+      <div class="summary-row total">
+        <span>Total:</span>
+        <span id="total">₹50</span>
+      </div>
+      <button id="checkout-btn" class="checkout-button">Proceed to Checkout</button>
+    </div>
+  </div>
+
+  <div id="checkout-modal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h3>Complete Your Order</h3>
+      <form id="checkout-form">
+        <div class="form-group">
+          <label for="delivery-address">Delivery Address</label>
+          <textarea id="delivery-address" required placeholder="Enter your complete delivery address"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input type="tel" id="phone" required placeholder="Enter your phone number" pattern="[0-9]{10}">
+        </div>
+        <div class="form-group">
+          <label>Payment Method</label>
+          <div class="payment-methods">
+            <label class="payment-option">
+              <input type="radio" name="payment" value="cod" checked>
+              <span>💵 Cash on Delivery (COD)</span>
+            </label>
+            <label class="payment-option">
+              <input type="radio" name="payment" value="online">
+              <span>💳 Online Payment</span>
+            </label>
+          </div>
+        </div>
+        <div class="order-total">
+          <strong>Total Amount: <span id="order-total">₹0</span></strong>
+        </div>
+        <button type="submit" class="auth-button">Place Order</button>
+        <div id="checkout-message" class="message"></div>
+      </form>
+    </div>
+  </div>
+
+</body>
+</html>

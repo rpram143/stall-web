@@ -1,11 +1,13 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+  base: '/stall-web/',
   server: {
     port: 5178,
     open: true
   },
   build: {
+    outDir: 'docs',
     rollupOptions: {
       input: {
         main: './index.html',
