@@ -1,5 +1,10 @@
 # This file configures Netlify's build and redirect settings.
 
+# Build settings
+[build]
+  publish = "dist"
+  command = "npm run build"
+
 # The following rule is a general SPA/MPA fallback. It tells Netlify that for any
 # request that doesn't match a file, it should serve /index.html instead.
 # This allows your client-side JavaScript to handle routing.
