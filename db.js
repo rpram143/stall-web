@@ -326,3 +326,14 @@ export async function updateOrderStatus(orderId, status) {
     throw error;
   }
 }
+
+export async function getAllUsers() {
+  try {
+    const usersCol = collection(db, 'users');
+    const userSnapshot = await getDocs(query(usersCol, orderBy('created_at', 'desc')));
+    return userSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error("Error getting all users from Firestore:", error);
+    throw error;
+  }
+}

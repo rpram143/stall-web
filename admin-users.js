@@ -1,4 +1,4 @@
-import { getFromStorage, setInStorage, getCurrentUser, logout } from './db.js';
+import { getAllUsers, getCurrentUser, logout } from './db.js';
 
 let users = [];
 
@@ -10,7 +10,7 @@ async function init() {
     return;
   }
 
-  loadUsers();
+  await loadUsers();
   setupEvents();
 }
 
@@ -25,47 +25,47 @@ function setupEvents() {
   }
 }
 
-function loadUsers() {
-  users = getFromStorage('users') || [];
+async function loadUsers() {
   const tbody = document.getElementById('admin-users-list');
+  tbody.innerHTML = '<tr><td colspan="4" class="loading">Loading users...</td></tr>';
 
-  if (users.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="4" class="loading">No users yet.</td></tr>';
-    return;
+  try {
+    users = await getAllUsers();
+
+    if (users.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" class="loading">No users yet.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = users.map(u => `
+      <tr>
+        <td>${escapeHtml(u.email)}</td>
+        <td>
+          <span class="role-badge ${u.is_admin ? 'role-admin' : 'role-user'}">${u.is_admin ? 'Admin' : 'User'}</span>
+        </td>
+        <td>${formatDate(u.created_at)}</td>
+        <td>
+          <button class="action-btn edit-btn" onclick="window.toggleAdmin('${u.id}')">${u.is_admin ? 'Revoke Admin' : 'Make Admin'}</button>
+          <button class="action-btn delete-btn" onclick="window.deleteUser('${u.id}')">Delete</button>
+        </td>
+      </tr>
+    `).join('');
+  } catch (error) {
+    console.error('Error loading users:', error);
+    tbody.innerHTML = '<tr><td colspan="4" class="loading">Error loading users. Please try again.</td></tr>';
   }
-
-  tbody.innerHTML = users.map(u => `
-    <tr>
-      <td>${escapeHtml(u.email)}</td>
-      <td>
-        <span class="role-badge ${u.is_admin ? 'role-admin' : 'role-user'}">${u.is_admin ? 'Admin' : 'User'}</span>
-      </td>
-      <td>${formatDate(u.created_at)}</td>
-      <td>
-        <button class="action-btn edit-btn" onclick="window.toggleAdmin('${u.id}')">${u.is_admin ? 'Revoke Admin' : 'Make Admin'}</button>
-        <button class="action-btn delete-btn" onclick="window.deleteUser('${u.id}')">Delete</button>
-      </td>
-    </tr>
-  `).join('');
 }
 
 window.toggleAdmin = function(userId) {
-  users = getFromStorage('users') || [];
-  const user = users.find(u => u.id === userId);
-  if (!user) return;
-  user.is_admin = !user.is_admin;
-  setInStorage('users', users);
-  loadUsers();
+  // Note: Firebase Auth doesn't allow changing admin status from client side
+  // This would need to be done via Firebase Admin SDK on the server
+  alert('Admin status changes require server-side implementation. Please contact the developer.');
 };
 
 window.deleteUser = function(userId) {
-  users = getFromStorage('users') || [];
-  const user = users.find(u => u.id === userId);
-  if (!user) return;
-  if (!confirm(`Delete user ${user.email}?`)) return;
-  const filtered = users.filter(u => u.id !== userId);
-  setInStorage('users', filtered);
-  loadUsers();
+  // Note: Firebase Auth doesn't allow deleting users from client side
+  // This would need to be done via Firebase Admin SDK on the server
+  alert('User deletion requires server-side implementation. Please contact the developer.');
 };
 
 function formatDate(iso) {
@@ -76,12 +76,10 @@ function formatDate(iso) {
 function escapeHtml(str) {
   return String(str)
     .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
+    .replace(/</g, '<')
+    .replace(/>/g, '>')
+    .replace(/"/g, '"')
     .replace(/'/g, '&#039;');
 }
 
 init();
-
-
