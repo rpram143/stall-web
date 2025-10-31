@@ -1,4 +1,24 @@
-// Utility functions for localStorage
+// Firebase configuration
+import { initializeApp } from 'firebase/app';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore, collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp } from 'firebase/firestore';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA7Ayn_c2npdIfglADFCfJAcR7ff23BA7A",
+  authDomain: "rajesh-sweet-stall.firebaseapp.com",
+  projectId: "rajesh-sweet-stall",
+  storageBucket: "rajesh-sweet-stall.firebasestorage.app",
+  messagingSenderId: "425836527227",
+  appId: "1:425836527227:web:0510e10b81d4767324acde",
+  measurementId: "G-M8K4T4GXNS"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// Utility functions for localStorage (fallback)
 export function getFromStorage(key) {
   const data = localStorage.getItem(key);
   return data ? JSON.parse(data) : null;
@@ -12,7 +32,7 @@ function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).substring(2);
 }
 
-// Initialize storage with default data if empty
+// Initialize storage with default data if empty (fallback)
 function initializeStorage() {
   if (!getFromStorage('users')) {
     setInStorage('users', []);
@@ -31,10 +51,10 @@ function initializeStorage() {
   }
 }
 
-// Initialize storage on load
+// Initialize storage on load (fallback)
 initializeStorage();
 const ADMIN_EMAIL = 'ramprasath143m@gmail.com';
-// API base - Express server
+// API base - Express server (fallback)
 const API_BASE = 'http://localhost:4000/api';
 
 async function fetchJson(url, opts = {}) {
@@ -61,50 +81,76 @@ export async function hashPassword(password) {
 }
 
 export async function registerUser(email, password) {
-  // Try server registration first
   try {
-    const user = await fetchJson(`${API_BASE}/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
-    });
-    return user;
-  } catch (err) {
-    // Fallback to client-side storage if server unreachable
-    const users = getFromStorage('users') || [];
-    const existingUser = users.find(user => user.email === email);
-    if (existingUser) throw new Error('User already exists');
-    const hashedPassword = await hashPassword(password);
-    const newUser = { id: generateId(), email, password: hashedPassword, is_admin: email.toLowerCase() === ADMIN_EMAIL, created_at: new Date().toISOString() };
-    users.push(newUser);
-    setInStorage('users', users);
-    const { password: _, ...userWithoutPassword } = newUser;
-    return userWithoutPassword;
+    // Try Firebase Auth first
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    const isAdmin = email.toLowerCase() === ADMIN_EMAIL;
+    return {
+      id: user.uid,
+      email: user.email,
+      is_admin: isAdmin,
+      created_at: new Date(user.metadata.creationTime).toISOString()
+    };
+  } catch (firebaseError) {
+    // Fallback to server registration
+    try {
+      const user = await fetchJson(`${API_BASE}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      return user;
+    } catch (serverError) {
+      // Final fallback to client-side storage
+      const users = getFromStorage('users') || [];
+      const existingUser = users.find(user => user.email === email);
+      if (existingUser) throw new Error('User already exists');
+      const hashedPassword = await hashPassword(password);
+      const newUser = { id: generateId(), email, password: hashedPassword, is_admin: email.toLowerCase() === ADMIN_EMAIL, created_at: new Date().toISOString() };
+      users.push(newUser);
+      setInStorage('users', users);
+      const { password: _, ...userWithoutPassword } = newUser;
+      return userWithoutPassword;
+    }
   }
 }
 
 export async function loginUser(email, password) {
-  // Try server login
   try {
-    const user = await fetchJson(`${API_BASE}/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
-    });
-    return user;
-  } catch (err) {
-    // Fallback to client-side auth
-    const users = getFromStorage('users') || [];
-    const hashedPassword = await hashPassword(password);
-    const user = users.find(u => u.email === email && u.password === hashedPassword);
-    if (!user) throw new Error('Invalid email or password');
-    // Ensure admin flag is up-to-date for the configured admin email
-    if (email.toLowerCase() === ADMIN_EMAIL && user.is_admin !== true) {
-      user.is_admin = true;
-      setInStorage('users', users);
+    // Try Firebase Auth first
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    const isAdmin = email.toLowerCase() === ADMIN_EMAIL;
+    return {
+      id: user.uid,
+      email: user.email,
+      is_admin: isAdmin,
+      created_at: new Date(user.metadata.creationTime).toISOString()
+    };
+  } catch (firebaseError) {
+    // Fallback to server login
+    try {
+      const user = await fetchJson(`${API_BASE}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      return user;
+    } catch (serverError) {
+      // Final fallback to client-side auth
+      const users = getFromStorage('users') || [];
+      const hashedPassword = await hashPassword(password);
+      const user = users.find(u => u.email === email && u.password === hashedPassword);
+      if (!user) throw new Error('Invalid email or password');
+      // Ensure admin flag is up-to-date for the configured admin email
+      if (email.toLowerCase() === ADMIN_EMAIL && user.is_admin !== true) {
+        user.is_admin = true;
+        setInStorage('users', users);
+      }
+      const { password: _, ...userWithoutPassword } = user;
+      return userWithoutPassword;
     }
-    const { password: _, ...userWithoutPassword } = user;
-    return userWithoutPassword;
   }
 }
 
@@ -136,7 +182,12 @@ export function setCurrentUser(user, remember = false) {
   }
 }
 
-export function logout() {
+export async function logout() {
+  try {
+    await signOut(auth);
+  } catch (error) {
+    console.error('Error signing out from Firebase:', error);
+  }
   // Clear both session and persistent login so user is fully logged out
   sessionStorage.removeItem('currentUser');
   localStorage.removeItem('currentUser');
@@ -160,6 +211,7 @@ export async function addProduct(product) {
     });
     return res;
   } catch (err) {
+    console.error('Server addProduct failed, falling back to localStorage:', err);
     const products = getFromStorage('products') || [];
     const newProduct = { ...product, id: generateId(), created_at: new Date().toISOString() };
     products.push(newProduct);

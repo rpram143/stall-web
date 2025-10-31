@@ -13,8 +13,8 @@
         <h1> Rajesh Sweet Stall</h1>
       </div>
       <ul class="nav-menu">
-        <li><a href="index.html" class="active">Home</a></li>
-        <li><a href="sweets.html">Sweets</a></li>
+      <li><a href="index.html" class="active">Home</a></li>
+        <li><a href="sweets.html">All Sweets</a></li>
         <li><a href="#about">About</a></li>
         <li id="cart-link" style="display: none;"><a href="cart.html">Cart <span id="cart-count" class="badge"></span></a></li>
         <li id="orders-link" style="display: none;"><a href="orders.html">Orders</a></li>
@@ -26,11 +26,143 @@
   </nav>
 
   <section class="hero">
+    <div class="hero-background">
+      <div class="hero-overlay"></div>
+      <div class="hero-pattern"></div>
+    </div>
     <div class="hero-content">
+      <div class="hero-badge">🏆 Since 1985</div>
       <h2 class="hero-title">Welcome to Rajesh Sweet Stall</h2>
       <p class="hero-subtitle">Authentic Tamil Nadu Sweets Since 1985</p>
       <p class="hero-description">Experience the traditional taste of South India's finest sweets, made with pure ghee and love</p>
-      <a href="#about" class="cta-button">Learn More</a>
+      <div class="hero-features">
+        <span class="feature-item">🍯 Pure Ghee</span>
+        <span class="feature-item">🌿 Traditional Recipes</span>
+        <span class="feature-item">🏠 Home Made</span>
+      </div>
+      <a href="#categories" class="cta-button">Explore Categories</a>
+    </div>
+    <div class="hero-decoration">
+      <img src="https://images.unsplash.com/photo-1551024506-0bccd828d307?w=200&h=200&fit=crop&crop=center" alt="Mysore Pak" class="hero-sweet-1">
+      <img src="https://images.unsplash.com/photo-1601050690597-df0568f70950?w=150&h=150&fit=crop&crop=center" alt="Jalebi" class="hero-sweet-2">
+      <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=180&h=180&fit=crop&crop=center" alt="Gulab Jamun" class="hero-sweet-3">
+    </div>
+  </section>
+
+  <!-- Categories Section -->
+  <section id="categories" class="categories-section">
+    <div class="section-decoration">
+      <img src="https://images.unsplash.com/photo-1551024506-0bccd828d307?w=100&h=100&fit=crop&crop=center" alt="Kaju Barfi" class="section-sweet-1">
+      <img src="https://images.unsplash.com/photo-1601050690597-df0568f70950?w=80&h=80&fit=crop&crop=center" alt="Rasgulla" class="section-sweet-2">
+    </div>
+    <div class="section-header">
+      <h2>Our Sweet Categories</h2>
+      <p>Discover the perfect sweet for every taste and occasion</p>
+    </div>
+    <div class="categories-grid">
+      <div class="category-card" data-category="Sweet">
+        <div class="category-bg" style="background-image: url('https://images.unsplash.com/photo-1551024506-0bccd828d307?w=400&h=300&fit=crop&crop=center');"></div>
+        <div class="category-overlay"></div>
+        <div class="category-content">
+          <div class="category-icon">🍬</div>
+          <h3>Sweet</h3>
+          <p>Traditional Tamil Nadu sweets made with pure ghee and authentic recipes</p>
+          <span class="category-count">8 items</span>
+        </div>
+      </div>
+      <div class="category-card" data-category="Spicy">
+        <div class="category-bg" style="background-image: url('https://images.unsplash.com/photo-1551782450-17144efb5723?w=400&h=300&fit=crop&crop=center');"></div>
+        <div class="category-overlay"></div>
+        <div class="category-content">
+          <div class="category-icon">🌶️</div>
+          <h3>Spicy</h3>
+          <p>Unique fusion of traditional sweets with a spicy twist</p>
+          <span class="category-count">2 items</span>
+        </div>
+      </div>
+      <div class="category-card" data-category="Salty">
+        <div class="category-bg" style="background-image: url('https://images.unsplash.com/photo-1596797038530-2c107229654b?w=400&h=300&fit=crop&crop=center');"></div>
+        <div class="category-overlay"></div>
+        <div class="category-content">
+          <div class="category-icon">🧂</div>
+          <h3>Salty</h3>
+          <p>Savory snacks and traditional South Indian savory items</p>
+          <span class="category-count">2 items</span>
+        </div>
+      </div>
+      <div class="category-card" data-category="Combinations">
+        <div class="category-bg" style="background-image: url('https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop&crop=center');"></div>
+        <div class="category-overlay"></div>
+        <div class="category-content">
+          <div class="category-icon">🎁</div>
+          <h3>Combinations</h3>
+          <p>Perfect gift packs and assorted sweet combinations</p>
+          <span class="category-count">4 items</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Sweets Section -->
+  <section class="featured-section">
+    <div class="section-decoration">
+      <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=120&h=120&fit=crop&crop=center" alt="Pista Roll" class="featured-decoration-1">
+      <img src="https://images.unsplash.com/photo-1551024506-0bccd828d307?w=100&h=100&fit=crop&crop=center" alt="Badam Halwa" class="featured-decoration-2">
+    </div>
+    <div class="section-header">
+      <h2>Featured Sweets</h2>
+      <p>Our most popular and beloved traditional sweets</p>
+    </div>
+    <div class="featured-grid">
+      <div class="featured-item">
+        <div class="featured-bg" style="background-image: url('https://images.unsplash.com/photo-1551024506-0bccd828d307?w=400&h=300&fit=crop&crop=center');"></div>
+        <div class="featured-overlay"></div>
+        <div class="featured-content">
+          <h3>Mysore Pak</h3>
+          <p>Traditional South Indian sweet made with finest besan flour and pure ghee</p>
+          <span class="featured-price">₹399</span>
+        </div>
+      </div>
+      <div class="featured-item">
+        <div class="featured-bg" style="background-image: url('https://images.unsplash.com/photo-1601050690597-df0568f70950?w=400&h=300&fit=crop&crop=center');"></div>
+        <div class="featured-overlay"></div>
+        <div class="featured-content">
+          <h3>Kaju Barfi</h3>
+          <p>Premium cashew fudge with pure silver foil garnish</p>
+          <span class="featured-price">₹599</span>
+        </div>
+      </div>
+      <div class="featured-item">
+        <div class="featured-bg" style="background-image: url('https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop&crop=center');"></div>
+        <div class="featured-overlay"></div>
+        <div class="featured-content">
+          <h3>Gulab Jamun</h3>
+          <p>Soft khoya dumplings soaked in cardamom and rose-scented sugar syrup</p>
+          <span class="featured-price">₹249</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="stats-section">
+    <div class="stats-container">
+      <div class="stat-item">
+        <div class="stat-number">35+</div>
+        <div class="stat-label">Years of Tradition</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">16+</div>
+        <div class="stat-label">Varieties</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">100%</div>
+        <div class="stat-label">Pure Ghee</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">500+</div>
+        <div class="stat-label">Happy Customers</div>
+      </div>
     </div>
   </section>
 
@@ -45,10 +177,36 @@
   </section>
 
   <section id="about" class="about-section">
+    <div class="about-decoration">
+      <img src="https://images.unsplash.com/photo-1551024506-0bccd828d307?w=150&h=150&fit=crop&crop=center" alt="Mysore Pak" class="about-sweet-1">
+      <img src="https://images.unsplash.com/photo-1601050690597-df0568f70950?w=120&h=120&fit=crop&crop=center" alt="Jalebi" class="about-sweet-2">
+      <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=100&h=100&fit=crop&crop=center" alt="Gulab Jamun" class="about-sweet-3">
+    </div>
     <div class="about-container">
       <h2>About Rajesh Sweet Stall</h2>
-      <p>For over three decades, Rajesh Sweet Stall has been serving the finest traditional Tamil Nadu sweets. Our recipes have been carefully preserved and perfected over generations, ensuring every bite takes you back to the authentic flavors of South India.</p>
-      <p>We use only the finest ingredients - pure ghee, premium cashews, and traditional methods to create sweets that are not just delicious, but also made with love and care.</p>
+      <div class="about-content">
+        <div class="about-text">
+          <p>For over three decades, Rajesh Sweet Stall has been serving the finest traditional Tamil Nadu sweets. Our recipes have been carefully preserved and perfected over generations, ensuring every bite takes you back to the authentic flavors of South India.</p>
+          <p>We specialize in iconic Tamil Nadu sweets like Mysore Pak, Jangiri, Gulab Jamun, and many more, made with pure ghee, premium cashews, and traditional methods to create sweets that are not just delicious, but also made with love and care.</p>
+        </div>
+        <div class="about-features">
+          <div class="about-feature">
+            <div class="feature-icon">🍬</div>
+            <h4>Mysore Pak</h4>
+            <p>Our signature crispy ghee sweet from Karnataka, loved across Tamil Nadu</p>
+          </div>
+          <div class="about-feature">
+            <div class="feature-icon">🌀</div>
+            <h4>Jangiri</h4>
+            <p>Traditional spiral-shaped sweet soaked in saffron syrup</p>
+          </div>
+          <div class="about-feature">
+            <div class="feature-icon">🍡</div>
+            <h4>Gulab Jamun</h4>
+            <p>Soft khoya dumplings in cardamom-rose scented syrup</p>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
