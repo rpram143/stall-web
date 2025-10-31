@@ -35,3 +35,6 @@ temp_db.txt
 *.njsproj
 *.sln
 *.sw?
+
+# Secrets
+firebase-service-account.json

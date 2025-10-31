@@ -53,24 +53,6 @@ function initializeStorage() {
 
 // Initialize storage on load (fallback)
 initializeStorage();
-const ADMIN_EMAIL = 'ramprasath143m@gmail.com';
-// API base - Express server (fallback)
-const API_BASE = 'http://localhost:4000/api';
-
-async function fetchJson(url, opts = {}) {
-  try {
-    const res = await fetch(url, opts);
-    const contentType = res.headers.get('content-type') || '';
-    if (!res.ok) {
-      const body = contentType.includes('application/json') ? await res.json() : await res.text();
-      throw new Error(body && body.error ? body.error : (typeof body === 'string' ? body : res.statusText));
-    }
-    if (contentType.includes('application/json')) return await res.json();
-    return await res.text();
-  } catch (err) {
-    throw err;
-  }
-}
 
 export async function hashPassword(password) {
   const encoder = new TextEncoder();
@@ -80,12 +62,15 @@ export async function hashPassword(password) {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+const ADMIN_EMAIL = 'ramprasath143m@gmail.com';
+
 export async function registerUser(email, password) {
   try {
-    // Try Firebase Auth first
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
     const isAdmin = email.toLowerCase() === ADMIN_EMAIL;
+    // Also create a user profile in Firestore
+    await setDoc(doc(db, 'users', user.uid), { email, is_admin: isAdmin, created_at: serverTimestamp() });
     return {
       id: user.uid,
       email: user.email,
@@ -93,32 +78,13 @@ export async function registerUser(email, password) {
       created_at: new Date(user.metadata.creationTime).toISOString()
     };
   } catch (firebaseError) {
-    // Fallback to server registration
-    try {
-      const user = await fetchJson(`${API_BASE}/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-      return user;
-    } catch (serverError) {
-      // Final fallback to client-side storage
-      const users = getFromStorage('users') || [];
-      const existingUser = users.find(user => user.email === email);
-      if (existingUser) throw new Error('User already exists');
-      const hashedPassword = await hashPassword(password);
-      const newUser = { id: generateId(), email, password: hashedPassword, is_admin: email.toLowerCase() === ADMIN_EMAIL, created_at: new Date().toISOString() };
-      users.push(newUser);
-      setInStorage('users', users);
-      const { password: _, ...userWithoutPassword } = newUser;
-      return userWithoutPassword;
-    }
+    console.error("Error registering user with Firebase:", firebaseError);
+    throw firebaseError;
   }
 }
 
 export async function loginUser(email, password) {
   try {
-    // Try Firebase Auth first
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
     const isAdmin = email.toLowerCase() === ADMIN_EMAIL;
@@ -129,28 +95,8 @@ export async function loginUser(email, password) {
       created_at: new Date(user.metadata.creationTime).toISOString()
     };
   } catch (firebaseError) {
-    // Fallback to server login
-    try {
-      const user = await fetchJson(`${API_BASE}/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-      return user;
-    } catch (serverError) {
-      // Final fallback to client-side auth
-      const users = getFromStorage('users') || [];
-      const hashedPassword = await hashPassword(password);
-      const user = users.find(u => u.email === email && u.password === hashedPassword);
-      if (!user) throw new Error('Invalid email or password');
-      // Ensure admin flag is up-to-date for the configured admin email
-      if (email.toLowerCase() === ADMIN_EMAIL && user.is_admin !== true) {
-        user.is_admin = true;
-        setInStorage('users', users);
-      }
-      const { password: _, ...userWithoutPassword } = user;
-      return userWithoutPassword;
-    }
+    console.error("Error logging in with Firebase:", firebaseError);
+    throw firebaseError;
   }
 }
 
@@ -195,175 +141,188 @@ export async function logout() {
 
 export async function getProducts() {
   try {
-    return await fetchJson(`${API_BASE}/products`);
-  } catch (err) {
-    return getFromStorage('products') || [];
+    const productsCol = collection(db, 'products');
+    const productSnapshot = await getDocs(query(productsCol, orderBy('name')));
+    return productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error("Error getting products from Firestore:", error);
+    throw error;
   }
 }
 
 export async function addProduct(product) {
-  // Admin-only: try server, fallback to local
   try {
-    const res = await fetchJson(`${API_BASE}/products`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(product)
-    });
-    return res;
-  } catch (err) {
-    console.error('Server addProduct failed, falling back to localStorage:', err);
-    const products = getFromStorage('products') || [];
-    const newProduct = { ...product, id: generateId(), created_at: new Date().toISOString() };
-    products.push(newProduct);
-    setInStorage('products', products);
-    return newProduct;
+    const productsCol = collection(db, 'products');
+    const docRef = await addDoc(productsCol, { ...product, created_at: serverTimestamp() });
+    return { id: docRef.id, ...product };
+  } catch (error) {
+    console.error("Error adding product to Firestore:", error);
+    throw error;
   }
 }
 
 export async function updateProduct(id, product) {
-  const products = getFromStorage('products') || [];
-  const index = products.findIndex(p => p.id === id);
-  
-  if (index === -1) throw new Error('Product not found');
-  
-  const updatedProduct = { ...products[index], ...product, id };
-  products[index] = updatedProduct;
-  setInStorage('products', products);
-  return updatedProduct;
+  try {
+    const productRef = doc(db, 'products', id);
+    await updateDoc(productRef, product);
+    return { id, ...product };
+  } catch (error) {
+    console.error("Error updating product in Firestore:", error);
+    throw error;
+  }
 }
 
 export async function deleteProduct(id) {
-  const products = getFromStorage('products') || [];
-  const filteredProducts = products.filter(p => p.id !== id);
-  setInStorage('products', filteredProducts);
+  try {
+    await deleteDoc(doc(db, 'products', id));
+  } catch (error) {
+    console.error("Error deleting product from Firestore:", error);
+    throw error;
+  }
 }
 
 export async function getCartItems(userId) {
   try {
-    const items = await fetchJson(`${API_BASE}/cart?user_id=${encodeURIComponent(userId)}`);
-    // map to old shape for compatibility
-    return items.map(i => ({ id: i.id, user_id: i.user_id, product_id: i.product_id, quantity: i.quantity, products: { id: i.product_id, name: i.product_name, price: i.product_price, image_url: i.image_url } }));
-  } catch (err) {
-    const cartItems = getFromStorage('cart_items') || [];
-    const products = getFromStorage('products') || [];
-    return cartItems.filter(item => item.user_id === userId).map(item => ({ ...item, products: products.find(p => p.id === item.product_id) }));
+    const q = query(collection(db, 'cart'), where('user_id', '==', userId));
+    const snapshot = await getDocs(q);
+    const items = await Promise.all(snapshot.docs.map(async (doc) => {
+      const item = { id: doc.id, ...doc.data() };
+      const productDoc = await getDoc(doc(db, 'products', item.product_id));
+      item.products = { id: productDoc.id, ...productDoc.data() };
+      return item;
+    }));
+    return items;
+  } catch (error) {
+    console.error("Error getting cart items from Firestore:", error);
+    throw error;
   }
 }
 
 export async function addToCart(userId, productId, quantity = 1) {
   try {
-    const res = await fetchJson(`${API_BASE}/cart`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: userId, product_id: productId, quantity })
-    });
-    return { id: res.id, user_id: res.user_id, product_id: res.product_id, quantity: res.quantity };
-  } catch (err) {
-    const cartItems = getFromStorage('cart_items') || [];
-    const existingItem = cartItems.find(item => item.user_id === userId && item.product_id === productId);
-    if (existingItem) { existingItem.quantity += quantity; setInStorage('cart_items', cartItems); return existingItem; }
-    const newItem = { id: generateId(), user_id: userId, product_id: productId, quantity, created_at: new Date().toISOString() };
-    cartItems.push(newItem); setInStorage('cart_items', cartItems); return newItem;
+    const q = query(collection(db, 'cart'), where('user_id', '==', userId), where('product_id', '==', productId));
+    const snapshot = await getDocs(q);
+    if (!snapshot.empty) {
+      const cartDoc = snapshot.docs[0];
+      const newQuantity = cartDoc.data().quantity + quantity;
+      await updateDoc(cartDoc.ref, { quantity: newQuantity });
+      return { id: cartDoc.id, quantity: newQuantity };
+    } else {
+      const docRef = await addDoc(collection(db, 'cart'), { user_id: userId, product_id: productId, quantity });
+      return { id: docRef.id, quantity };
+    }
+  } catch (error) {
+    console.error("Error adding to cart in Firestore:", error);
+    throw error;
   }
 }
 
 export async function updateCartQuantity(cartItemId, quantity) {
   try {
-    const res = await fetchJson(`${API_BASE}/cart/${encodeURIComponent(cartItemId)}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ quantity })
-    });
-    return res;
-  } catch (err) {
-    if (quantity <= 0) return deleteCartItem(cartItemId);
-    const cartItems = getFromStorage('cart_items') || [];
-    const item = cartItems.find(item => item.id === cartItemId);
-    if (!item) throw new Error('Cart item not found');
-    item.quantity = quantity; setInStorage('cart_items', cartItems); return item;
+    if (quantity <= 0) {
+      return await deleteCartItem(cartItemId);
+    }
+    const itemRef = doc(db, 'cart', cartItemId);
+    await updateDoc(itemRef, { quantity });
+    return { id: cartItemId, quantity };
+  } catch (error) {
+    console.error("Error updating cart quantity in Firestore:", error);
+    throw error;
   }
 }
 
 export async function deleteCartItem(cartItemId) {
   try {
-    await fetchJson(`${API_BASE}/cart/${encodeURIComponent(cartItemId)}`, { method: 'DELETE' });
+    await deleteDoc(doc(db, 'cart', cartItemId));
     return { ok: true };
-  } catch (err) {
-    const cartItems = getFromStorage('cart_items') || [];
-    const filteredItems = cartItems.filter(item => item.id !== cartItemId);
-    setInStorage('cart_items', filteredItems);
-    return { ok: true };
+  } catch (error) {
+    console.error("Error deleting cart item from Firestore:", error);
+    throw error;
   }
 }
 
 export async function clearCart(userId) {
-  // server has no explicit clear endpoint; delete items one-by-one
   try {
-    const items = await getCartItems(userId);
-    for (const it of items) {
-      await fetchJson(`${API_BASE}/cart/${encodeURIComponent(it.id)}`, { method: 'DELETE' });
-    }
-  } catch (err) {
-    const cartItems = getFromStorage('cart_items') || [];
-    const filteredItems = cartItems.filter(item => item.user_id !== userId);
-    setInStorage('cart_items', filteredItems);
+    const q = query(collection(db, 'cart'), where('user_id', '==', userId));
+    const snapshot = await getDocs(q);
+    const deletePromises = snapshot.docs.map(doc => deleteDoc(doc.ref));
+    await Promise.all(deletePromises);
+  } catch (error) {
+    console.error("Error clearing cart from Firestore:", error);
+    throw error;
   }
 }
 
 export async function createOrder(userId, orderData, cartItems) {
   try {
-    const res = await fetchJson(`${API_BASE}/orders`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: userId, total_amount: orderData.total_amount, delivery_address: orderData.delivery_address, phone: orderData.phone })
+    const orderRef = await addDoc(collection(db, 'orders'), {
+      user_id: userId,
+      total_amount: orderData.total_amount,
+      delivery_address: orderData.delivery_address,
+      phone: orderData.phone,
+      status: 'pending',
+      created_at: serverTimestamp()
     });
-    return res;
-  } catch (err) {
-    const orders = getFromStorage('orders') || [];
-    const orderItems = getFromStorage('order_items') || [];
-    const order = { id: generateId(), user_id: userId, total_amount: orderData.total_amount, delivery_address: orderData.delivery_address, phone: orderData.phone, status: 'pending', created_at: new Date().toISOString() };
-    const newOrderItems = cartItems.map(item => ({ id: generateId(), order_id: order.id, product_id: item.product_id, product_name: item.products.name, quantity: item.quantity, price: item.products.price }));
-    orders.push(order); orderItems.push(...newOrderItems); setInStorage('orders', orders); setInStorage('order_items', orderItems); await clearCart(userId); return order;
+
+    const orderItemsPromises = cartItems.map(item => addDoc(collection(db, 'order_items'), {
+      order_id: orderRef.id,
+      product_id: item.product_id,
+      product_name: item.products.name,
+      quantity: item.quantity,
+      price: item.products.price
+    }));
+    await Promise.all(orderItemsPromises);
+
+    await clearCart(userId);
+
+    return { id: orderRef.id };
+  } catch (error) {
+    console.error("Error creating order in Firestore:", error);
+    throw error;
   }
 }
 
 export async function getOrders(userId) {
   try {
-    const res = await fetchJson(`${API_BASE}/orders?user_id=${encodeURIComponent(userId)}`);
-    return res;
-  } catch (err) {
-    const orders = getFromStorage('orders') || [];
-    const orderItems = getFromStorage('order_items') || [];
-    const products = getFromStorage('products') || [];
-    return orders.filter(order => order.user_id === userId).sort((a,b)=> new Date(b.created_at)-new Date(a.created_at)).map(order => ({ ...order, order_items: orderItems.filter(item => item.order_id === order.id).map(item => ({ ...item, products: products.find(p => p.id === item.product_id) })) }));
+    const q = query(collection(db, 'orders'), where('user_id', '==', userId), orderBy('created_at', 'desc'));
+    const snapshot = await getDocs(q);
+    return Promise.all(snapshot.docs.map(async (doc) => {
+      const order = { id: doc.id, ...doc.data() };
+      const itemsQuery = query(collection(db, 'order_items'), where('order_id', '==', order.id));
+      const itemsSnapshot = await getDocs(itemsQuery);
+      order.order_items = itemsSnapshot.docs.map(itemDoc => ({ id: itemDoc.id, ...itemDoc.data() }));
+      return order;
+    }));
+  } catch (error) {
+    console.error("Error getting orders from Firestore:", error);
+    throw error;
   }
 }
 
 export async function getAllOrders() {
-  const orders = getFromStorage('orders') || [];
-  const orderItems = getFromStorage('order_items') || [];
-  const products = getFromStorage('products') || [];
-
-  return orders
-    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-    .map(order => ({
-      ...order,
-      order_items: orderItems
-        .filter(item => item.order_id === order.id)
-        .map(item => ({
-          ...item,
-          products: products.find(p => p.id === item.product_id)
-        }))
+  try {
+    const q = query(collection(db, 'orders'), orderBy('created_at', 'desc'));
+    const snapshot = await getDocs(q);
+    return Promise.all(snapshot.docs.map(async (doc) => {
+      const order = { id: doc.id, ...doc.data() };
+      const itemsQuery = query(collection(db, 'order_items'), where('order_id', '==', order.id));
+      const itemsSnapshot = await getDocs(itemsQuery);
+      order.order_items = itemsSnapshot.docs.map(itemDoc => ({ id: itemDoc.id, ...itemDoc.data() }));
+      return order;
     }));
+  } catch (error) {
+    console.error("Error getting all orders from Firestore:", error);
+    throw error;
+  }
 }
 
 export async function updateOrderStatus(orderId, status) {
-  const orders = getFromStorage('orders') || [];
-  const order = orders.find(o => o.id === orderId);
-  
-  if (!order) throw new Error('Order not found');
-  
-  order.status = status;
-  setInStorage('orders', orders);
-  return order;
+  try {
+    const orderRef = doc(db, 'orders', orderId);
+    await updateDoc(orderRef, { status });
+    return { id: orderId, status };
+  } catch (error) {
+    console.error("Error updating order status in Firestore:", error);
+    throw error;
+  }
 }
